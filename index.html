@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Christmas in the Cabins — Family Reunion Picker</title>
+  <style>
+    :root{
+      --bg:#0b1726;--panel:#12223a;--panel2:#0f1c31;--text:#e9f0fb;--muted:#a8bfdc;--accent:#5cc8ff;--accent2:#9ef0a7;--warn:#ffd66b;--danger:#ff8e8e;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#09111d 50%,var(--bg));
+         color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    .wrap{max-width:1200px;margin:0 auto;padding:24px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    h1{font-size:clamp(22px,3vw,34px);margin:0;letter-spacing:.5px}
+    .sub{color:var(--muted);font-size:14px}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{border:1px solid #2e456a;background:linear-gradient(180deg,#183154,#132845);color:var(--text);
+         padding:10px 14px;border-radius:12px;cursor:pointer;transition:.2s ease; font-weight:600}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px #0007}
+    .btn.ghost{background:transparent}
+    .btn.accent{background:linear-gradient(180deg,#1f7fb1,#156792);border-color:#1f7fb1}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px;margin-top:18px}
+
+    .card{background:radial-gradient(1200px 300px at 20% -20%,#213b63 0,#152a48 35%,#10223a 100%);
+          border:1px solid #213558;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;min-height:420px}
+    .hero{position:relative;height:160px;background:linear-gradient(120deg,#1d365d,#274b7c);display:flex;align-items:center;justify-content:center}
+    .hero svg{opacity:.85}
+    .badge{position:absolute;top:10px;left:10px;background:#0e1b30;border:1px solid #2b446b;color:var(--muted);
+           padding:4px 10px;border-radius:999px;font-size:12px}
+    .content{padding:14px 14px 4px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .title{font-weight:800;font-size:18px}
+    .loc{color:var(--muted);font-size:13px}
+    .pill{display:inline-flex;gap:6px;align-items:center;background:#0e1b30;border:1px solid #2b446b;color:var(--muted);
+          padding:4px 8px;border-radius:999px;font-size:12px}
+    .pills{display:flex;gap:6px;flex-wrap:wrap}
+
+    details{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid #22385e;border-radius:12px}
+    summary{cursor:pointer;padding:10px 12px;user-select:none;font-weight:700}
+    .box{padding:10px 12px;border-top:1px dashed #2a4270}
+
+    .money{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .money label{font-size:12px;color:var(--muted)}
+    input[type="number"], input[type="text"], select{width:100%;padding:10px 10px;border-radius:10px;background:#0e1b30;color:var(--text);
+      border:1px solid #2b446b}
+    input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{opacity:1}
+
+    .calc{display:grid;grid-template-columns:1.2fr .8fr;gap:10px}
+    .calc .right{background:#0c192b;border:1px solid #233a60;border-radius:12px;padding:12px}
+    .kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .kpi .item{background:#0f1e34;border:1px solid #25406b;border-radius:10px;padding:10px}
+    .kpi .item .label{font-size:12px;color:var(--muted)}
+    .kpi .item .value{font-size:18px;font-weight:900}
+
+    .tabbar{display:flex;gap:6px;flex-wrap:wrap}
+    .tabbar button{background:#0e1b30;border:1px solid #29446f;color:#cfe0ff;padding:6px 10px;border-radius:999px;font-size:12px;cursor:pointer}
+    .tabbar button.active{background:#1f7fb1;border-color:#2ea4d4}
+
+    .vote{display:flex;gap:8px;align-items:center;margin-top:auto}
+    .vote input{width:180px}
+    .vote small{color:var(--muted)}
+
+    .compare{margin-top:26px;background:linear-gradient(180deg,#10213a,#0b182c);border:1px solid #244169;border-radius:16px;padding:14px}
+    .compare h2{margin:0 0 10px 0}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-top:1px solid #1b2c48;padding:10px;text-align:left;font-size:14px}
+    th{color:#cfe0ff;font-weight:800}
+    tbody tr:nth-child(odd){background:#0c192b}
+
+    .notice{font-size:12px;color:var(--muted)}
+    .dot{height:8px;width:8px;background:var(--accent2);border-radius:50%;display:inline-block;margin-right:6px}
+
+    @media (max-width:720px){
+      .calc{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🎄 Christmas in the Cabins — Family Reunion Picker</h1>
+        <div class="sub">Compare 5 cabin/lodge options side‑by‑side. Enter a nightly rate & fees for accurate totals, preview a suggested 4‑night itinerary, and let everyone vote. All inputs & votes are saved on your device.</div>
+      </div>
+      <div class="controls">
+        <button class="btn accent" id="shareBtn">Copy Shareable Snapshot</button>
+        <button class="btn ghost" id="resetBtn" title="Clear all inputs & votes">Reset</button>
+      </div>
+    </header>
+
+    <section class="grid" id="cards"></section>
+
+    <section class="compare" id="comparison">
+      <h2>Quick Comparison</h2>
+      <div class="notice"><span class="dot"></span>Totals assume 4 nights and the inputs you provide below. Change values on any card to update this table.</div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="compareTable" aria-label="Comparison table">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Nearest City</th>
+              <th>Max Sleeps</th>
+              <th>Nightly Rate</th>
+              <th>Taxes %</th>
+              <th>Fixed Fees</th>
+              <th>Total for 4 Nights</th>
+              <th>Per Person (60)</th>
+              <th>Votes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="exportVotes">Export Votes (CSV)</button>
+        <button class="btn" id="sortByTotal">Sort by Lowest Total</button>
+        <button class="btn" id="sortByVotes">Sort by Most Votes</button>
+      </div>
+    </section>
+
+    <p class="notice" style="margin-top:14px">Notes: Pricing, capacity, and rules vary by date. Use the “Check Rates” links on each card to confirm live availability and holiday pricing before booking. This tool helps compare options and collect preferences only.</p>
+  </div>
+
+  <template id="cardTpl">
+    <article class="card">
+      <div class="hero" aria-hidden="true">
+        <div class="badge">Sleeps <span data-bind="sleeps"></span></div>
+        <svg width="240" height="120" viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="70" width="240" height="50" rx="8" fill="#0d1a2c"/>
+          <rect x="20" y="50" width="80" height="40" rx="6" fill="#153055"/>
+          <rect x="110" y="40" width="60" height="50" rx="6" fill="#18365f"/>
+          <rect x="180" y="60" width="40" height="30" rx="6" fill="#1b3e6b"/>
+          <circle cx="208" cy="26" r="10" fill="#ffefad"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="title" data-bind="name"></div>
+        <div class="loc" data-bind="area"></div>
+        <div class="pills">
+          <span class="pill">Type: <span data-bind="type" style="margin-left:6px;color:#fff"></span></span>
+          <span class="pill">4‑Night Friendly</span>
+          <a class="pill" target="_blank" rel="noopener" data-bind-href="url">Check Rates ↗</a>
+        </div>
+
+        <div class="calc">
+          <div>
+            <details open>
+              <summary>Budget Inputs</summary>
+              <div class="box money">
+                <div>
+                  <label>Nightly Rate ($)</label>
+                  <input type="number" min="0" step="1" data-model="rate" />
+                </div>
+                <div>
+                  <label>Cleaning/Resort Fees ($, total)</label>
+                  <input type="number" min="0" step="1" data-model="fees" />
+                </div>
+                <div>
+                  <label>Taxes & Lodging %</label>
+                  <input type="number" min="0" step="0.01" data-model="tax" />
+                </div>
+                <div>
+                  <label>Guests (for per‑person)</label>
+                  <input type="number" min="1" step="1" data-model="guests" />
+                </div>
+              </div>
+            </details>
+
+            <div class="kpi" style="margin-top:10px">
+              <div class="item">
+                <div class="label">Total (4 nights)</div>
+                <div class="value" data-bind="total4">$0</div>
+              </div>
+              <div class="item">
+                <div class="label">Per Person</div>
+                <div class="value" data-bind="pp">$0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right">
+            <div class="tabbar" role="tablist">
+              <button data-tab="overview" class="active" role="tab">Overview</button>
+              <button data-tab="itinerary" role="tab">4‑Night Itinerary</button>
+              <button data-tab="travel" role="tab">Travel</button>
+              <button data-tab="notes" role="tab">Notes</button>
+            </div>
+            <div class="tab" data-tabpanel="overview">
+              <ul style="margin:8px 0 0 18px; line-height:1.5">
+                <li data-bind="blurb"></li>
+                <li><strong>Holiday friendly:</strong> typically allows 3–4+ night stays; confirm minimums and décor policies.</li>
+                <li><strong>Gathering spaces:</strong> great‑room + large dining. Verify seating count and kitchen gear.</li>
+              </ul>
+            </div>
+            <div class="tab" data-tabpanel="itinerary" hidden>
+              <ol style="margin:8px 0 0 18px; line-height:1.5">
+                <li><strong>Night 1:</strong> Arrival & cocoa bar, ornament exchange, pizza/BBQ welcome.</li>
+                <li><strong>Day 2:</strong> Brunch; afternoon photos & hike; evening game tourney/movie.</li>
+                <li><strong>Day 3:</strong> Split excursions (shopping, scenic drive, spa); kids craft workshop; family talent night.</li>
+                <li><strong>Day 4:</strong> Christmas dinner potluck; cookie bake‑off; pajama party + hot cocoa.</li>
+                <li><strong>Morning 5:</strong> Farewell breakfast, clean‑up, checkout.</li>
+              </ol>
+            </div>
+            <div class="tab" data-tabpanel="travel" hidden>
+              <ul style="margin:8px 0 0 18px; line-height:1.5">
+                <li><strong>Nearest major airport:</strong> <span data-bind="airport"></span></li>
+                <li><strong>Drive time from Greenville, SC:</strong> <span data-bind="drive"></span></li>
+                <li><a data-bind-href="map" target="_blank" rel="noopener">Open area map ↗</a></li>
+              </ul>
+            </div>
+            <div class="tab" data-tabpanel="notes" hidden>
+              <div class="notice">Organizer notes (private to your device)</div>
+              <textarea data-model="notes" rows="5" style="width:100%;margin-top:6px;background:#0e1b30;color:#e9f0fb;border:1px solid #2b446b;border-radius:8px;padding:8px" placeholder="Parking passes? Pool rules? Early check‑in? Décor? Caterer?"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="vote">
+          <input type="text" placeholder="Your name (for vote)" data-model="voter" />
+          <button class="btn" data-action="vote">Vote for This</button>
+          <small data-bind="voteCount">0 votes</small>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    // --- Data (you can edit URLs & blurbs) ---
+    const DATA = [
+      {
+        id:"grand-leconte",
+        name:"Grand LeConte Lodge",
+        area:"Pigeon Forge, Tennessee (Smokies)",
+        type:"Single mega‑cabin",
+        sleeps:92,
+        airport:"TYS (Knoxville) ~1 hr",
+        drive:"~2.5–3 hrs",
+        url:"https://www.largecabinrentals.com/",
+        map:"https://maps.google.com/?q=Pigeon+Forge+TN",
+        blurb:"Huge lodge frequently booked for reunions; confirm holiday décor rules and large kitchen setup.",
+        defaults:{ rate:1800, tax:12.75, fees:1200, guests:60 }
+      },
+      {
+        id:"big-vista",
+        name:"Big Vista Lodge (Large Cabin Rentals)",
+        area:"Pigeon Forge, Tennessee",
+        type:"Large cabin",
+        sleeps:64,
+        airport:"TYS (Knoxville) ~1 hr",
+        drive:"~2.5–3 hrs",
+        url:"https://www.largecabinrentals.com/",
+        map:"https://maps.google.com/?q=Pigeon+Forge+TN",
+        blurb:"Spacious common areas; good balance of bedrooms and gathering space for ~60 guests.",
+        defaults:{ rate:1400, tax:12.75, fees:1000, guests:60 }
+      },
+      {
+        id:"splash-mountain",
+        name:"Splash Mountain (Large Cabin Rentals)",
+        area:"Pigeon Forge, Tennessee",
+        type:"Large cabin",
+        sleeps:60,
+        airport:"TYS (Knoxville) ~1 hr",
+        drive:"~2.5–3 hrs",
+        url:"https://www.largecabinrentals.com/",
+        map:"https://maps.google.com/?q=Pigeon+Forge+TN",
+        blurb:"Sleeps about 60 across multiple levels; great for keeping everyone in one home.",
+        defaults:{ rate:1300, tax:12.75, fees:1000, guests:60 }
+      },
+      {
+        id:"lake-junaluska",
+        name:"Lake Junaluska Cottage Cluster",
+        area:"Lake Junaluska, North Carolina (near Asheville)",
+        type:"Cluster of lakeside homes",
+        sleeps:80,
+        airport:"AVL (Asheville) ~40–50 min",
+        drive:"~1.5–2 hrs",
+        url:"https://www.lakejunaluska.com/stay/",
+        map:"https://maps.google.com/?q=Lake+Junaluska+NC",
+        blurb:"Reserve a cluster of cottages; great walkability, lakeside photos, and event spaces if needed.",
+        defaults:{ rate:1100, tax:11.75, fees:900, guests:60 }
+      },
+      {
+        id:"carolina-getaway",
+        name:"Carolina Getaway Cabins",
+        area:"Roaring River, North Carolina (Blue Ridge)",
+        type:"Cabin community for large groups",
+        sleeps:150,
+        airport:"CLT (Charlotte) ~1 hr 45 min",
+        drive:"~3–3.5 hrs",
+        url:"https://www.carolinagetawaycabins.com/",
+        map:"https://maps.google.com/?q=Roaring+River+NC",
+        blurb:"Coordinate multiple neighboring cabins; each family can have its own place within walking distance.",
+        defaults:{ rate:1200, tax:12.0, fees:1200, guests:60 }
+      }
+    ];
+
+    const FOUR_NIGHTS = 4;
+
+    // --- Local storage helpers ---
+    const KEY = 'cabin-picker-v1';
+    const load = () => {
+      try{ return JSON.parse(localStorage.getItem(KEY)) || {} }catch{ return {} }
+    }
+    const save = (state) => localStorage.setItem(KEY, JSON.stringify(state));
+
+    const state = load();
+
+    // --- Utilities ---
+    const money = n => n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+    const money2 = n => n.toLocaleString(undefined,{style:'currency',currency:'USD'});
+
+    function computeTotals(rate, taxPct, fees){
+      const base = rate * FOUR_NIGHTS;
+      const tax = base * (Number(taxPct||0)/100);
+      const total = base + tax + Number(fees||0);
+      return {base, tax, total};
+    }
+
+    // --- Render cards ---
+    const cardsEl = document.getElementById('cards');
+    const rowTpl = document.getElementById('cardTpl');
+
+    function ensureStateDefaults(id, defaults){
+      state[id] = state[id] || {};
+      ['rate','tax','fees','guests','votes','notes'].forEach(k=>{
+        if(state[id][k]===undefined){
+          if(k==='votes') state[id][k]=[];
+          else if(k==='notes') state[id][k]='';
+          else state[id][k]=defaults[k];
+        }
+      });
+    }
+
+    function render(){
+      cardsEl.innerHTML='';
+      DATA.forEach(item=>{
+        ensureStateDefaults(item.id, item.defaults);
+        const clone = rowTpl.content.cloneNode(true);
+        clone.querySelector('[data-bind="sleeps"]').textContent = item.sleeps;
+        clone.querySelector('[data-bind="name"]').textContent = item.name;
+        clone.querySelector('[data-bind="area"]').textContent = item.area;
+        clone.querySelector('[data-bind="airport"]').textContent = item.airport;
+        clone.querySelector('[data-bind="drive"]').textContent = item.drive;
+        clone.querySelector('[data-bind="blurb"]').textContent = item.blurb;
+        clone.querySelector('[data-bind="voteCount"]').textContent = `${state[item.id].votes.length} votes`;
+        clone.querySelector('[data-bind="pp"]').textContent = money2(0);
+        clone.querySelector('[data-bind="total4"]').textContent = money2(0);
+        clone.querySelector('[data-bind="type"]').textContent = item.type;
+        clone.querySelector('[data-bind-href="url"]').href = item.url;
+        clone.querySelector('[data-bind-href="map"]').href = item.map;
+
+        // inputs
+        const rate = clone.querySelector('[data-model="rate"]');
+        const tax = clone.querySelector('[data-model="tax"]');
+        const fees = clone.querySelector('[data-model="fees"]');
+        const guests = clone.querySelector('[data-model="guests"]');
+        const notes = clone.querySelector('[data-model="notes"]');
+        const voter = clone.querySelector('[data-model="voter"]');
+        const voteBtn = clone.querySelector('[data-action="vote"]');
+        const totalEl = clone.querySelector('[data-bind="total4"]');
+        const ppEl = clone.querySelector('[data-bind="pp"]');
+
+        // init values
+        rate.value = state[item.id].rate;
+        tax.value = state[item.id].tax;
+        fees.value = state[item.id].fees;
+        guests.value = state[item.id].guests;
+        notes.value = state[item.id].notes;
+
+        function recalc(){
+          const { total } = computeTotals(Number(rate.value||0), Number(tax.value||0), Number(fees.value||0));
+          const per = total / Math.max(1, Number(guests.value||1));
+          totalEl.textContent = money2(total);
+          ppEl.textContent = money2(per);
+          state[item.id].rate = Number(rate.value||0);
+          state[item.id].tax = Number(tax.value||0);
+          state[item.id].fees = Number(fees.value||0);
+          state[item.id].guests = Number(guests.value||0);
+          save(state);
+          buildTable();
+        }
+
+        [rate,tax,fees,guests].forEach(inp=>inp.addEventListener('input', recalc));
+        notes.addEventListener('input', ()=>{ state[item.id].notes = notes.value; save(state); });
+
+        voteBtn.addEventListener('click', ()=>{
+          const name = (voter.value||'').trim();
+          if(!name) { alert('Enter your name to vote.'); return; }
+          const already = state[item.id].votes.find(v=>v.toLowerCase()===name.toLowerCase());
+          if(already){ alert('You have already voted for this option.'); return; }
+          // remove vote in other options from same voter
+          DATA.forEach(x=>{ state[x.id].votes = (state[x.id].votes||[]).filter(v=>v.toLowerCase()!==name.toLowerCase()); });
+          state[item.id].votes.push(name);
+          save(state);
+          render();
+          buildTable();
+        });
+
+        // tabs
+        clone.querySelectorAll('.tabbar button').forEach(btn=>{
+          btn.addEventListener('click', e=>{
+            const parent = e.currentTarget.closest('.right');
+            parent.querySelectorAll('.tabbar button').forEach(b=>b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            parent.querySelectorAll('[data-tabpanel]').forEach(p=>p.hidden=true);
+            parent.querySelector(`[data-tabpanel="${e.currentTarget.dataset.tab}"]`).hidden=false;
+          })
+        });
+
+        // initial calculate
+        recalc();
+
+        cardsEl.appendChild(clone);
+      });
+    }
+
+    // --- Comparison table ---
+    const tbody = document.querySelector('#compareTable tbody');
+
+    function buildTable(sortBy){
+      const rows = DATA.map(d=>{
+        const { total } = computeTotals(state[d.id].rate, state[d.id].tax, state[d.id].fees);
+        const per = total / Math.max(1, state[d.id].guests||1);
+        return {
+          id:d.id, name:d.name, area:d.area, sleeps:d.sleeps,
+          nightly: state[d.id].rate, tax: state[d.id].tax, fees: state[d.id].fees,
+          total, per, votes: (state[d.id].votes||[]).length
+        };
+      });
+
+      if(sortBy==='total') rows.sort((a,b)=>a.total-b.total);
+      if(sortBy==='votes') rows.sort((a,b)=>b.votes-a.votes);
+
+      tbody.innerHTML = rows.map(r=>`
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.area}</td>
+          <td>${r.sleeps}</td>
+          <td>${money(r.nightly)}</td>
+          <td>${r.tax}%</td>
+          <td>${money(r.fees)}</td>
+          <td><strong>${money2(r.total)}</strong></td>
+          <td>${money2(r.per)}</td>
+          <td>${r.votes}</td>
+        </tr>
+      `).join('');
+    }
+
+    // --- Export votes ---
+    function exportVotes(){
+      const lines = ["Location,Name"]; 
+      DATA.forEach(d=>{ (state[d.id].votes||[]).forEach(name=>lines.push(`"${d.name}","${name}"`)) });
+      const blob = new Blob([lines.join('\n')],{type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'cabin-votes.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Share snapshot ---
+    async function copySnapshot(){
+      const summary = DATA.map(d=>{
+        const { total } = computeTotals(state[d.id].rate, state[d.id].tax, state[d.id].fees);
+        const per = total/Math.max(1,state[d.id].guests||1);
+        return `• ${d.name} — Total ${money2(total)} (Per person ${money2(per)}) — Votes: ${(state[d.id].votes||[]).length}`;
+      }).join('\n');
+      const txt = `Christmas in the Cabins — Options\n${'-'.repeat(34)}\n${summary}\n\nEnter your name on a card to vote. Totals assume 4 nights.`;
+      try {
+        await navigator.clipboard.writeText(txt);
+        alert('Copied a summary to your clipboard! Paste it into a text or email.');
+      } catch {
+        alert('Could not copy automatically. Select & copy the table manually.');
+      }
+    }
+
+    // --- Reset ---
+    function resetAll(){
+      if(!confirm('Clear all inputs and votes?')) return;
+      localStorage.removeItem(KEY);
+      Object.keys(state).forEach(k=>delete state[k]);
+      render();
+      buildTable();
+    }
+
+    // --- Wire up top buttons ---
+    document.getElementById('exportVotes').addEventListener('click', exportVotes);
+    document.getElementById('sortByTotal').addEventListener('click', ()=>buildTable('total'));
+    document.getElementById('sortByVotes').addEventListener('click', ()=>buildTable('votes'));
+    document.getElementById('shareBtn').addEventListener('click', copySnapshot);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+    // initial
+    render();
+    buildTable();
+  </script>
+</body>
+</html>
